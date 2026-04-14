@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TBS CamAdvisor — TBSTRATEGIES</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --tbs-dark: #0D1B2A;
+  --tbs-blue: #1A5276;
+  --tbs-mid: #2471A3;
+  --tbs-light: #AED6F1;
+  --tbs-accent: #00D4AA;
+  --tbs-warn: #F39C12;
+  --tbs-error: #E74C3C;
+  --tbs-green: #27AE60;
+  --bg: #F0F4F8;
+  --card: #FFFFFF;
+  --border: #D5E8F0;
+  --text: #1A2332;
+  --muted: #6B8099;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ─── HEADER ─────────────────────────────────────────────────────────── */
+header{
+  background:var(--tbs-dark);
+  border-bottom:2px solid var(--tbs-blue);
+  padding:0 32px;
+  height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{
+  width:36px;height:36px;background:var(--tbs-blue);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:800;font-size:14px;color:white;letter-spacing:-0.5px;
+}
+.logo-text{font-family:var(--display);font-weight:700;font-size:18px;color:white}
+.logo-sub{font-family:var(--mono);font-size:11px;color:var(--tbs-light);opacity:0.7;margin-top:1px}
+.header-badge{
+  font-family:var(--mono);font-size:10px;color:var(--tbs-accent);
+  border:1px solid var(--tbs-accent);padding:3px 10px;border-radius:3px;opacity:0.8;
+}
+
+/* ─── LAYOUT ──────────────────────────────────────────────────────────── */
+.app{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 60px);gap:0}
+
+/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */
+.sidebar{
+  background:var(--tbs-dark);
+  padding:24px 20px;
+  overflow-y:auto;
+  border-right:1px solid rgba(255,255,255,0.07);
+}
+.sidebar-section{margin-bottom:24px}
+.sidebar-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;
+  color:var(--tbs-light);opacity:0.5;text-transform:uppercase;
+  margin-bottom:12px;padding-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+label.field-label{
+  display:block;font-size:11px;color:rgba(255,255,255,0.5);
+  margin-bottom:4px;margin-top:10px;font-family:var(--mono);
+}
+input[type=text],input[type=password],input[type=number],select,textarea{
+  width:100%;background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:5px;padding:8px 10px;
+  color:white;font-size:12px;font-family:var(--sans);
+  outline:none;transition:border-color .2s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--tbs-accent)}
+select option{background:#1a2332;color:white}
+textarea{resize:vertical;min-height:60px;font-size:11px}
+
+/* ─── UPLOAD ZONE ──────────────────────────────────────────────────────── */
+.upload-zone{
+  border:1.5px dashed rgba(255,255,255,0.18);
+  border-radius:8px;padding:16px;text-align:center;
+  cursor:pointer;transition:all .2s;margin-bottom:8px;
+  background:rgba(255,255,255,0.03);
+  position:relative;overflow:hidden;
+}
+.upload-zone:hover,.upload-zone.drag{
+  border-color:var(--tbs-accent);background:rgba(0,212,170,0.06);
+}
+.upload-zone.loaded{border-color:var(--tbs-green);border-style:solid}
+.upload-zone input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+  background:none;border:none;padding:0;
+}
+.upload-icon{font-size:24px;margin-bottom:6px;display:block}
+.upload-text{font-size:11px;color:rgba(255,255,255,0.5);font-family:var(--mono)}
+.upload-name{font-size:11px;color:var(--tbs-green);font-family:var(--mono);margin-top:4px;word-break:break-all}
+
+/* ─── BOUTON ANALYSER ──────────────────────────────────────────────────── */
+.btn-analyze{
+  width:100%;margin-top:4px;
+  background:linear-gradient(135deg,var(--tbs-blue),var(--tbs-mid));
+  color:white;border:none;border-radius:7px;
+  padding:14px;font-family:var(--display);font-weight:700;
+  font-size:14px;cursor:pointer;letter-spacing:0.5px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.btn-analyze:hover:not(:disabled){
+  background:linear-gradient(135deg,var(--tbs-mid),var(--tbs-accent));
+  transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,82,118,0.4);
+}
+.btn-analyze:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.btn-analyze.running{
+  background:linear-gradient(135deg,#0D3349,#1A5276);
+  animation:pulse-btn 1.5s ease-in-out infinite;
+}
+@keyframes pulse-btn{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.4)}
+  50%{box-shadow:0 0 0 8px rgba(0,212,170,0)}
+}
+.btn-reset{
+  width:100%;margin-top:8px;
+  background:transparent;color:rgba(255,255,255,0.4);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:7px;padding:9px;
+  font-size:12px;cursor:pointer;
+  transition:all .2s;
+}
+.btn-reset:hover{border-color:var(--tbs-error);color:var(--tbs-error)}
+
+/* ─── MAIN CONTENT ─────────────────────────────────────────────────────── */
+.main{padding:28px 32px;overflow-y:auto}
+
+/* ─── ÉTAT INITIAL ──────────────────────────────────────────────────────── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:60vh;text-align:center;opacity:0;
+  animation:fadeIn .6s ease forwards .3s;
+}
+@keyframes fadeIn{to{opacity:1}}
+.empty-icon{font-size:56px;margin-bottom:20px;filter:grayscale(0.3)}
+.empty-title{font-family:var(--display);font-weight:800;font-size:26px;
+  color:var(--tbs-blue);margin-bottom:10px}
+.empty-desc{color:var(--muted);font-size:14px;max-width:400px;line-height:1.7}
+.workflow-steps{
+  display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;justify-content:center;
+}
+.step{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:16px 20px;text-align:left;
+  flex:1;min-width:160px;max-width:200px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.step-num{
+  width:26px;height:26px;background:var(--tbs-blue);color:white;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:500;margin-bottom:10px;
+}
+.step-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.step-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* ─── LOADING ─────────────────────────────────────────────────────────── */
+.loading{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh}
+.loading.active{display:flex}
+.spinner{
+  width:56px;height:56px;
+  border:3px solid var(--border);
+  border-top:3px solid var(--tbs-accent);
+  border-radius:50%;
+  animation:spin 0.9s linear infinite;
+  margin-bottom:24px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:var(--display);font-weight:700;font-size:18px;color:var(--tbs-blue);margin-bottom:8px}
+.loading-steps{list-style:none;text-align:left}
+.loading-steps li{
+  font-size:12px;font-family:var(--mono);color:var(--muted);
+  padding:4px 0;display:flex;align-items:center;gap:8px;
+}
+.loading-steps li.done{color:var(--tbs-green)}
+.loading-steps li.active{color:var(--tbs-accent)}
+.loading-steps li::before{content:'○';font-size:10px}
+.loading-steps li.done::before{content:'✓'}
+.loading-steps li.active::before{content:'◉';animation:blink .8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ─── RÉSULTAT ────────────────────────────────────────────────────────── */
+.result{display:none}
+.result.active{display:block}
+.result-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:24px;gap:16px;flex-wrap:wrap;
+}
+.result-title-block{}
+.result-title{font-family:var(--display);font-weight:800;font-size:22px;color:var(--tbs-dark)}
+.result-subtitle{font-size:13px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-pdf{
+  background:var(--tbs-blue);color:white;border:none;
+  border-radius:7px;padding:11px 20px;font-size:13px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:7px;
+  transition:all .2s;
+}
+.btn-pdf:hover{background:var(--tbs-mid);transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,82,118,0.35)}
+.btn-new{
+  background:white;color:var(--tbs-blue);
+  border:1.5px solid var(--border);border-radius:7px;
+  padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .2s;
+}
+.btn-new:hover{border-color:var(--tbs-blue);background:var(--tbs-blue);color:white}
+
+/* ─── FICHE RÉSULTAT ─────────────────────────────────────────────────── */
+#fiche-container{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+.fiche-top{
+  background:var(--tbs-dark);padding:24px 28px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+}
+.fiche-top-left .fiche-ref{
+  font-family:var(--mono);font-size:11px;color:var(--tbs-light);opacity:0.6;margin-bottom:6px;
+}
+.fiche-top-left .fiche-piece{
+  font-family:var(--display);font-weight:800;font-size:20px;color:white;
+}
+.fiche-top-left .fiche-mat{
+  font-size:12px;color:var(--tbs-light);margin-top:4px;
+}
+.fiche-top-right{text-align:right}
+.fiche-top-right .fiche-date{
+  font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.35);
+}
+.fiche-top-right .fiche-badge{
+  display:inline-block;margin-top:6px;
+  background:var(--tbs-accent);color:var(--tbs-dark);
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  padding:3px 10px;border-radius:3px;
+}
+.fiche-body{padding:24px 28px}
+
+/* ─── BLOC OPÉRATION ─────────────────────────────────────────────────── */
+.op-section{margin-bottom:28px}
+.op-section-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--tbs-blue);
+  border-bottom:2px solid var(--tbs-blue);
+  padding-bottom:6px;margin-bottom:14px;
+}
+.op-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.op-card{
+  border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;transition:box-shadow .2s;
+}
+.op-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+.op-card-head{
+  background:var(--tbs-blue);color:white;
+  padding:10px 14px;display:flex;justify-content:space-between;align-items:center;
+}
+.op-card-head .op-name{
+  font-family:var(--display);font-weight:700;font-size:13px;
+}
+.op-card-head .op-type{
+  font-family:var(--mono);font-size:10px;background:rgba(255,255,255,0.15);
+  padding:2px 8px;border-radius:3px;
+}
+.op-card-body{padding:12px 14px}
+.op-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;
+}
+.op-row:last-child{border-bottom:none}
+.op-key{color:var(--muted);font-family:var(--mono);font-size:11px;min-width:120px}
+.op-val{font-weight:500;color:var(--text);text-align:right;font-size:12px;max-width:160px}
+.op-val.accent{color:var(--tbs-blue);font-family:var(--mono)}
+.op-val.warn{color:var(--tbs-warn)}
+.op-val.good{color:var(--tbs-green)}
+.op-note{
+  margin-top:10px;padding:8px 10px;
+  background:#F0F7FF;border-left:3px solid var(--tbs-mid);
+  border-radius:0 4px 4px 0;font-size:11px;color:var(--muted);line-height:1.6;
+}
+
+/* ─── RÉSUMÉ OUTILS ──────────────────────────────────────────────────── */
+.tools-summary{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;
+  margin-bottom:24px;
+}
+.tool-pill{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px;
+}
+.tool-pill-icon{
+  width:32px;height:32px;background:var(--tbs-blue);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.tool-pill-info .tool-pill-name{font-size:11px;font-weight:600;color:var(--text)}
+.tool-pill-info .tool-pill-spec{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+/* ─── AVERTISSEMENTS ─────────────────────────────────────────────────── */
+.warnings-box{
+  background:#FFF8F0;border:1px solid #FAD7A0;border-radius:8px;
+  padding:14px 16px;margin-top:20px;
+}
+.warnings-box .warn-title{
+  font-size:12px;font-weight:600;color:var(--tbs-warn);margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.warnings-box ul{list-style:none;padding:0}
+.warnings-box li{font-size:11px;color:#7D6008;padding:2px 0;font-family:var(--mono)}
+.warnings-box li::before{content:"⚠ ";color:var(--tbs-warn)}
+
+/* ─── ERREUR ─────────────────────────────────────────────────────────── */
+.error-box{
+  background:#FFF0F0;border:1.5px solid var(--tbs-error);
+  border-radius:8px;padding:20px;text-align:center;margin:40px auto;max-width:500px;
+}
+.error-box h3{color:var(--tbs-error);margin-bottom:8px;font-family:var(--display)}
+.error-box p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ─── MISC ───────────────────────────────────────────────────────────── */
+.api-status{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;
+  padding:6px 10px;border-radius:4px;margin-top:10px;
+}
+.api-status.ok{background:rgba(39,174,96,0.1);color:var(--tbs-green)}
+.api-status.ko{background:rgba(231,76,60,0.1);color:var(--tbs-error)}
+.api-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{border-right:none;border-bottom:1px solid rgba(255,255,255,0.07)}
+  .main{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">TBS</div>
+    <div>
+      <div class="logo-text">CamAdvisor</div>
+      <div class="logo-sub">TBSTRATEGIES — Toulouse</div>
+    </div>
+  </div>
+  <div class="header-badge">FAO / TopSolid'Cam</div>
+</header>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Clé API Anthropic</div>
+      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off"/>
+      <div id="apiStatus" class="api-status ko"><span class="dot"></span>Non configurée</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Fichiers pièce</div>
+      <label class="field-label">Modèle 3D (STEP / IGS / STL)</label>
+      <div class="upload-zone" id="zone3d">
+        <input type="file" id="file3d" accept=".step,.stp,.igs,.iges,.stl,.x_t,.x_b"/>
+        <span class="upload-icon">📐</span>
+        <div class="upload-text">Glisser ou cliquer</div>
+        <div class="upload-name" id="name3d"></div>
+      </div>
+      <label class="field-label">Plan 2D (PDF)</label>
+      <div class="upload-zone" id="zonePdf">
+        <input type="file" id="filePdf" accept=".pdf"/>
+        <span class="upload-icon">📄</span>
+        <div class="upload-text">Glisser ou cliquer</div>
+        <div class="upload-name" id="namePdf"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pièce</div>
+      <label class="field-label">Désignation</label>
+      <input type="text" id="designation" placeholder="Ex: Carter boîte de vitesses"/>
+      <label class="field-label">Référence</label>
+      <input type="text" id="reference" placeholder="Ex: 1329SY201200"/>
+      <label class="field-label">Client / Donneur d'ordre</label>
+      <input type="text" id="client" placeholder="Ex: Latécoère, Embraer..."/>
+      <label class="field-label">Matière (si connue)</label>
+      <input type="text" id="matiere" placeholder="Ex: Aluminium 7075-T6, Inox 316L"/>
+      <label class="field-label">Programme / OF</label>
+      <input type="text" id="programme" placeholder="Ex: EOS Embraer E2"/>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Machine</div>
+      <label class="field-label">Type de machine</label>
+      <select id="machine">
+        <option>Centre d'usinage 3 axes</option>
+        <option>Centre d'usinage 4 axes</option>
+        <option>Centre d'usinage 5 axes</option>
+        <option>Tour CNC 2 axes</option>
+        <option>Tour-fraiseur (mill-turn)</option>
+        <option>Centre de tournage multi-axe</option>
+      </select>
+      <label class="field-label">Commande numérique</label>
+      <select id="cn">
+        <option>Fanuc 31i</option>
+        <option>Fanuc 0i-MF</option>
+        <option>Siemens 840D sl</option>
+        <option>Heidenhain TNC 640</option>
+        <option>Heidenhain iTNC 530</option>
+        <option>Mazatrol Smooth</option>
+        <option>MACH3/4</option>
+      </select>
+      <label class="field-label">Broche max (tr/min)</label>
+      <input type="number" id="broche" value="12000" min="1000" max="60000"/>
+      <label class="field-label">Puissance max (kW)</label>
+      <input type="number" id="puissance" value="15" min="1" max="100"/>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Informations complémentaires</div>
+      <label class="field-label">Notes / contraintes particulières</label>
+      <textarea id="notes" placeholder="Ex: Pièce aéronautique critique, tolérances ±0.01mm sur alésages, Ra 0.8 sur portées..."></textarea>
+    </div>
+
+    <button class="btn-analyze" id="btnAnalyze" onclick="lancerAnalyse()">
+      ▶ Générer la fiche technique
+    </button>
+    <button class="btn-reset" id="btnReset" onclick="reinitialiser()" style="display:none">
+      ↺ Nouvelle analyse
+    </button>
+
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- État initial -->
+    <div class="empty-state" id="stateEmpty">
+      <div class="empty-icon">⚙️</div>
+      <div class="empty-title">Prêt à analyser</div>
+      <div class="empty-desc">
+        Chargez vos fichiers, configurez votre machine et laissez l'IA générer une fiche technique complète pour TopSolid'Cam.
+      </div>
+      <div class="workflow-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-label">Clé API</div>
+          <div class="step-desc">Configurez votre clé Anthropic dans la sidebar</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-label">Fichiers</div>
+          <div class="step-desc">STEP/IGS et/ou plan PDF de la pièce</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-label">Analyser</div>
+          <div class="step-desc">L'IA détecte les features et choisit les outils</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-label">Exporter PDF</div>
+          <div class="step-desc">Fiche prête à utiliser sous TopSolid'Cam</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="stateLoading">
+      <div class="spinner"></div>
+      <div class="loading-title">Analyse IA en cours…</div>
+      <ul class="loading-steps" id="loadingSteps">
+        <li id="ls1">Lecture des fichiers et extraction des données</li>
+        <li id="ls2">Identification des features d'usinage</li>
+        <li id="ls3">Sélection des outils coupants optimaux</li>
+        <li id="ls4">Calcul des paramètres de coupe</li>
+        <li id="ls5">Génération de la fiche technique TopSolid'Cam</li>
+      </ul>
+    </div>
+
+    <!-- Résultat -->
+    <div class="result" id="stateResult">
+      <div class="result-header">
+        <div class="result-title-block">
+          <div class="result-title" id="resultTitle">Fiche technique générée</div>
+          <div class="result-subtitle" id="resultSubtitle"></div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-pdf" onclick="exporterPDF()">📥 Télécharger PDF</button>
+          <button class="btn-new" onclick="reinitialiser()">↺ Nouvelle pièce</button>
+        </div>
+      </div>
+      <div id="fiche-container"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── État global ─────────────────────────────────────────────────────────────
+let ficheTechniqueData = null;
+let fileContent3D = '';
+let filePdfContent = '';
+let fileName3D = '';
+let fileNamePdf = '';
+
+// ─── Gestion API Key ──────────────────────────────────────────────────────────
+document.getElementById('apiKey').addEventListener('input', function(){
+  const ok = this.value.trim().startsWith('sk-ant');
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + (ok ? 'ok' : 'ko');
+  el.innerHTML = `<span class="dot"></span>${ok ? 'Clé valide' : 'Non configurée'}`;
+});
+
+// ─── Gestion upload fichiers ───────────────────────────────────────────────────
+document.getElementById('file3d').addEventListener('change', function(){
+  const f = this.files[0];
+  if(!f) return;
+  fileName3D = f.name;
+  document.getElementById('name3d').textContent = f.name;
+  document.getElementById('zone3d').classList.add('loaded');
+  const reader = new FileReader();
+  reader.onload = e => {
+    fileContent3D = e.target.result;
+    // Pour STEP/IGS : garder les 200 premières lignes (métadonnées)
+    if(f.name.match(/\.(step|stp|igs|iges)$/i)){
+      const lines = fileContent3D.split('\n').slice(0,200).join('\n');
+      fileContent3D = lines;
+    } else {
+      fileContent3D = `[Fichier STL binaire — ${Math.round(f.size/1024)} KB — ${f.name}]`;
+    }
+  };
+  reader.readAsText(f);
+});
+
+document.getElementById('filePdf').addEventListener('change', function(){
+  const f = this.files[0];
+  if(!f) return;
+  fileNamePdf = f.name;
+  document.getElementById('namePdf').textContent = f.name;
+  document.getElementById('zonePdf').classList.add('loaded');
+  // PDF : lire en base64 pour envoi à l'API
+  const reader = new FileReader();
+  reader.onload = e => { filePdfContent = e.target.result.split(',')[1]; };
+  reader.readAsDataURL(f);
+});
+
+// ─── Drag & drop ──────────────────────────────────────────────────────────────
+['zone3d','zonePdf'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drag'); });
+});
+
+// ─── Animation étapes loading ─────────────────────────────────────────────────
+function animerEtapes() {
+  const etapes = ['ls1','ls2','ls3','ls4','ls5'];
+  let i = 0;
+  const interval = setInterval(() => {
+    if(i > 0) document.getElementById(etapes[i-1]).className = 'done';
+    if(i < etapes.length) {
+      document.getElementById(etapes[i]).className = 'active';
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 2500);
+  return interval;
+}
+
+// ─── Construire le prompt ─────────────────────────────────────────────────────
+function construirePrompt() {
+  const designation = document.getElementById('designation').value.trim();
+  const reference = document.getElementById('reference').value.trim();
+  const client = document.getElementById('client').value.trim();
+  const matiere = document.getElementById('matiere').value.trim();
+  const programme = document.getElementById('programme').value.trim();
+  const machine = document.getElementById('machine').value;
+  const cn = document.getElementById('cn').value;
+  const broche = document.getElementById('broche').value;
+  const puissance = document.getElementById('puissance').value;
+  const notes = document.getElementById('notes').value.trim();
+
+  let prompt = `Tu es un expert FAO aéronautique chez TBSTRATEGIES (Toulouse). 
+Génère une FICHE TECHNIQUE D'USINAGE complète pour la programmation sur TopSolid'Cam.
+
+PIÈCE :
+- Désignation : ${designation || 'Non renseignée'}
+- Référence : ${reference || 'Non renseignée'}
+- Client : ${client || 'Non renseigné'}
+- Matière : ${matiere || 'À déterminer depuis les fichiers'}
+- Programme : ${programme || 'Non renseigné'}
+
+MACHINE :
+- Type : ${machine}
+- CN : ${cn}
+- Broche max : ${broche} tr/min
+- Puissance max : ${puissance} kW
+
+NOTES / CONTRAINTES : ${notes || 'Aucune contrainte particulière'}
+
+${fileContent3D ? `DONNÉES MODÈLE 3D (${fileName3D}) :\n${fileContent3D.substring(0,3000)}\n` : ''}
+
+INSTRUCTIONS :
+Analyse les données disponibles et génère la fiche technique complète.
+Si les fichiers ne sont pas suffisants pour détecter précisément toutes les features, fais des recommandations standards intelligentes basées sur la désignation, la matière et le type de machine.
+
+Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans texte avant/après) selon ce schéma :
+{
+  "piece": {
+    "designation": "...",
+    "reference": "...",
+    "client": "...",
+    "matiere": "...",
+    "groupe_iso": "P/M/K/N/S/H",
+    "durete_hb": 0,
+    "rm_mpa": 0
+  },
+  "machine": {
+    "type": "...",
+    "cn": "...",
+    "broche_max": 0,
+    "puissance_kw": 0
+  },
+  "operations": [
+    {
+      "numero": 1,
+      "nom": "Surfaçage face principale",
+      "type_topsolid": "Fraisage de face",
+      "description": "Description courte de l'opération",
+      "phase": "Ébauche|Demi-finition|Finition",
+      "outil": {
+        "type": "Fraise à surfacer / Fraise 2 tailles / Fraise boule / Foret / Alésoir / Taraud / Fraise torique / Fraise à chanfreiner",
+        "designation": "Nom commercial complet",
+        "diametre_mm": 0.0,
+        "longueur_utile_mm": 0.0,
+        "longueur_totale_mm": 0.0,
+        "nb_dents": 0,
+        "angle_helix_deg": 0,
+        "matiere_outil": "Carbure monobloc TiAlN | HSS-Co TiN | Carbure revêtu AlCrN | PCD | CBN",
+        "revetement": "TiAlN|TiN|AlCrN|DLC|Sans",
+        "fabricant_ref": "Ex: Sandvik R216.34-10050 / Kennametal B041A / ISCAR",
+        "rayon_bec_mm": 0.0
+      },
+      "parametres_coupe": {
+        "vc_m_min": 0.0,
+        "n_tr_min": 0.0,
+        "fz_mm_dent": 0.0,
+        "vf_mm_min": 0.0,
+        "ap_mm": 0.0,
+        "ae_mm": 0.0,
+        "ae_pourcent_D": 0.0,
+        "arrosage": "Emulsion | MQL | Air comprimé | Aucun | Huile entière"
+      },
+      "sequence_passes": "Ex: 1. Ébauche ap=5mm ae=60%D → 2. Finition ap=0.3mm ae=20%D",
+      "topsolid_cam_settings": "Ex: Stratégie: Zigzag / Surépaisseur: 0.3mm / Tolérance: 0.01mm",
+      "tolerances": "Ex: IT7 sur alésages, Ra 1.6 sur portées",
+      "remarques": "Conseils techniques importants pour ce TopSolid'Cam",
+      "avertissements": []
+    }
+  ],
+  "resume_outillage": [
+    {
+      "outil": "Désignation courte",
+      "diametre_mm": 0.0,
+      "utilise_pour": "liste des opérations",
+      "emoji": "🔧"
+    }
+  ],
+  "avertissements_generaux": [],
+  "recommandations_topsolid": "Conseils généraux pour la programmation TopSolid'Cam de cette pièce"
+}`;
+
+  return prompt;
+}
+
+// ─── Appel API Claude ─────────────────────────────────────────────────────────
+async function appelClaude(prompt) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if(!apiKey) throw new Error('Clé API non configurée');
+
+  const messages = [{ role: 'user', content: [] }];
+
+  // Ajouter le PDF si disponible
+  if(filePdfContent) {
+    messages[0].content.push({
+      type: 'document',
+      source: { type: 'base64', media_type: 'application/pdf', data: filePdfContent }
+    });
+  }
+
+  messages[0].content.push({ type: 'text', text: prompt });
+
+  // Appel direct à l'API Anthropic
+  // Note : fonctionne depuis http://localhost ou un serveur web.
+  // Si ouvert en file://, le navigateur bloque (CORS). Dans ce cas on tente via un worker cloudflare public.
+  const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages';
+
+  const bodyPayload = JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 4096,
+    system: `Tu es un expert FAO (Fabrication Assistée par Ordinateur) spécialisé en usinage CNC aéronautique chez TBSTRATEGIES (Toulouse). 
+Tu maîtrises parfaitement TopSolid'Cam V6, les normes aéronautiques (EN9100, AS9102), et les catalogues outils Sandvik, Kennametal, ISCAR, Walter, Seco.
+Tu fournis des recommandations précises et chiffrées : diamètres exacts, conditions de coupe réalistes, séquences opératoires optimales.
+Tu réponds UNIQUEMENT en JSON valide, sans texte avant ni après, sans balises markdown.`,
+    messages
+  });
+
+  let response;
+  try {
+    response = await fetch(ANTHROPIC_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: bodyPayload
+    });
+  } catch(corsErr) {
+    // Fallback : proxy CORS (uniquement si appel direct bloqué par le navigateur en file://)
+    response = await fetch('https://corsproxy.io/?' + encodeURIComponent(ANTHROPIC_ENDPOINT), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'x-requested-with': 'XMLHttpRequest'
+      },
+      body: bodyPayload
+    });
+  }
+
+  if(!response.ok) {
+    const err = await response.text();
+    throw new Error(`API Claude: ${response.status} — ${err.substring(0,200)}`);
+  }
+
+  const data = await response.json();
+  let text = data.content.map(b => b.text || '').join('');
+
+  // Nettoyer éventuels backticks
+  text = text.trim().replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(text);
+}
+
+// ─── Lancer l'analyse ─────────────────────────────────────────────────────────
+async function lancerAnalyse() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if(!apiKey.startsWith('sk-ant')) {
+    alert('Veuillez configurer votre clé API Anthropic (sk-ant-...)');
+    return;
+  }
+  if(!fileContent3D && !filePdfContent && !document.getElementById('designation').value.trim()) {
+    alert('Veuillez charger au moins un fichier ou renseigner la désignation de la pièce.');
+    return;
+  }
+
+  // Afficher loading
+  document.getElementById('stateEmpty').style.display = 'none';
+  document.getElementById('stateResult').className = 'result';
+  document.getElementById('stateLoading').className = 'loading active';
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('btnAnalyze').classList.add('running');
+  document.getElementById('btnAnalyze').textContent = '⟳ Analyse en cours…';
+
+  // Réinitialiser étapes
+  ['ls1','ls2','ls3','ls4','ls5'].forEach(id => {
+    document.getElementById(id).className = '';
+  });
+
+  const intervalAnim = animerEtapes();
+
+  try {
+    const prompt = construirePrompt();
+    const data = await appelClaude(prompt);
+    clearInterval(intervalAnim);
+    ['ls1','ls2','ls3','ls4','ls5'].forEach(id => {
+      document.getElementById(id).className = 'done';
+    });
+
+    ficheTechniqueData = data;
+    await new Promise(r => setTimeout(r, 600));
+
+    afficherResultat(data);
+
+  } catch(err) {
+    clearInterval(intervalAnim);
+    document.getElementById('stateLoading').className = 'loading';
+    document.getElementById('stateEmpty').style.display = '';
+    document.getElementById('stateResult').className = 'result active';
+    document.getElementById('fiche-container').innerHTML = `
+      <div class="error-box">
+        <h3>Erreur lors de l'analyse</h3>
+        <p>${err.message}</p>
+        <p style="margin-top:10px;font-size:11px;">Vérifiez votre clé API et votre connexion Internet.</p>
+      </div>`;
+  } finally {
+    document.getElementById('btnAnalyze').disabled = false;
+    document.getElementById('btnAnalyze').classList.remove('running');
+    document.getElementById('btnAnalyze').textContent = '▶ Générer la fiche technique';
+  }
+}
+
+// ─── Affichage résultat ───────────────────────────────────────────────────────
+function afficherResultat(d) {
+  document.getElementById('stateLoading').className = 'loading';
+  document.getElementById('stateResult').className = 'result active';
+  document.getElementById('btnReset').style.display = 'block';
+
+  const p = d.piece || {};
+  const m = d.machine || {};
+  const ops = d.operations || [];
+
+  document.getElementById('resultTitle').textContent =
+    `${p.designation || 'Pièce analysée'} — Fiche TopSolid'Cam`;
+  document.getElementById('resultSubtitle').textContent =
+    `${p.reference || ''} | ${p.matiere || ''} | ${ops.length} opération(s) | ${m.type || ''}`;
+
+  // Grouper par phase
+  const phases = {};
+  ops.forEach(op => {
+    const ph = op.phase || 'Général';
+    if(!phases[ph]) phases[ph] = [];
+    phases[ph].push(op);
+  });
+
+  let html = `
+  <div class="fiche-top">
+    <div class="fiche-top-left">
+      <div class="fiche-ref">TBSTRATEGIES — Fiche FAO TopSolid'Cam</div>
+      <div class="fiche-piece">${p.designation || '—'}</div>
+      <div class="fiche-mat">
+        Réf: ${p.reference || '—'} &nbsp;|&nbsp; 
+        Matière: ${p.matiere || '—'} (ISO ${p.groupe_iso || '?'}) &nbsp;|&nbsp; 
+        Machine: ${m.type || '—'} / ${m.cn || '—'}
+      </div>
+    </div>
+    <div class="fiche-top-right">
+      <div class="fiche-date">${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}</div>
+      <div class="fiche-badge">TopSolid'Cam V6</div>
+    </div>
+  </div>
+  <div class="fiche-body">`;
+
+  // Résumé outils
+  if(d.resume_outillage && d.resume_outillage.length) {
+    html += `<div class="op-section">
+      <div class="op-section-title">📦 Outillage requis (${d.resume_outillage.length} outil(s))</div>
+      <div class="tools-summary">`;
+    d.resume_outillage.forEach(t => {
+      html += `<div class="tool-pill">
+        <div class="tool-pill-icon">${t.emoji || '🔧'}</div>
+        <div class="tool-pill-info">
+          <div class="tool-pill-name">${t.outil}</div>
+          <div class="tool-pill-spec">Ø${t.diametre_mm}mm — ${t.utilise_pour}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Opérations par phase
+  const ordrePhases = ['Ébauche','Demi-finition','Finition','Général'];
+  ordrePhases.forEach(phase => {
+    if(!phases[phase]) return;
+    const icons = {'Ébauche':'⚡','Demi-finition':'🔄','Finition':'✨','Général':'⚙️'};
+    html += `<div class="op-section">
+      <div class="op-section-title">${icons[phase]||'⚙️'} Phase — ${phase}</div>
+      <div class="op-grid">`;
+    
+    phases[phase].forEach(op => {
+      const outil = op.outil || {};
+      const pc = op.parametres_coupe || {};
+      html += `<div class="op-card">
+        <div class="op-card-head">
+          <div class="op-name">${op.numero}. ${op.nom}</div>
+          <div class="op-type">${op.type_topsolid || ''}</div>
+        </div>
+        <div class="op-card-body">
+          <div class="op-row"><span class="op-key">Outil</span><span class="op-val">${outil.type || '—'}</span></div>
+          <div class="op-row"><span class="op-key">Désignation</span><span class="op-val" style="font-size:11px">${outil.designation || '—'}</span></div>
+          <div class="op-row"><span class="op-key">Diamètre</span><span class="op-val accent">Ø ${outil.diametre_mm || '—'} mm</span></div>
+          <div class="op-row"><span class="op-key">Long. utile</span><span class="op-val accent">${outil.longueur_utile_mm || '—'} mm</span></div>
+          <div class="op-row"><span class="op-key">Long. totale</span><span class="op-val">${outil.longueur_totale_mm || '—'} mm</span></div>
+          <div class="op-row"><span class="op-key">Nb dents</span><span class="op-val">${outil.nb_dents || '—'} Z</span></div>
+          <div class="op-row"><span class="op-key">Hélice</span><span class="op-val">${outil.angle_helix_deg ? outil.angle_helix_deg+'°' : '—'}</span></div>
+          <div class="op-row"><span class="op-key">Matière / Revêt.</span><span class="op-val" style="font-size:10px">${outil.matiere_outil || '—'}</span></div>
+          <div class="op-row"><span class="op-key">Réf. fabricant</span><span class="op-val" style="font-size:10px">${outil.fabricant_ref || '—'}</span></div>
+          ${outil.rayon_bec_mm > 0 ? `<div class="op-row"><span class="op-key">Rayon de bec</span><span class="op-val accent">r${outil.rayon_bec_mm} mm</span></div>` : ''}
+          <div class="op-row" style="margin-top:6px;background:#F0F7FF;padding:4px 6px;border-radius:4px">
+            <span class="op-key" style="color:var(--tbs-blue);font-weight:600">Vc</span>
+            <span class="op-val accent">${pc.vc_m_min || '—'} m/min</span>
+          </div>
+          <div class="op-row" style="background:#F0F7FF;padding:4px 6px;border-radius:4px">
+            <span class="op-key" style="color:var(--tbs-blue);font-weight:600">n (broche)</span>
+            <span class="op-val accent">${pc.n_tr_min ? Math.round(pc.n_tr_min)+' tr/min' : '—'}</span>
+          </div>
+          <div class="op-row" style="background:#F0F7FF;padding:4px 6px;border-radius:4px">
+            <span class="op-key" style="color:var(--tbs-blue);font-weight:600">fz</span>
+            <span class="op-val accent">${pc.fz_mm_dent || '—'} mm/dent</span>
+          </div>
+          <div class="op-row" style="background:#F0F7FF;padding:4px 6px;border-radius:4px">
+            <span class="op-key" style="color:var(--tbs-blue);font-weight:600">Vf (avance)</span>
+            <span class="op-val accent">${pc.vf_mm_min ? Math.round(pc.vf_mm_min)+' mm/min' : '—'}</span>
+          </div>
+          <div class="op-row"><span class="op-key">ap (passe axiale)</span><span class="op-val">${pc.ap_mm || '—'} mm</span></div>
+          <div class="op-row"><span class="op-key">ae (%D)</span><span class="op-val">${pc.ae_pourcent_D || '—'} %</span></div>
+          <div class="op-row"><span class="op-key">ae (absolu)</span><span class="op-val">${pc.ae_mm || '—'} mm</span></div>
+          <div class="op-row"><span class="op-key">Arrosage</span><span class="op-val good">${pc.arrosage || '—'}</span></div>
+          ${op.tolerances ? `<div class="op-row"><span class="op-key">Tolérances</span><span class="op-val" style="font-size:10px">${op.tolerances}</span></div>` : ''}
+          ${op.sequence_passes ? `<div class="op-note">📋 ${op.sequence_passes}</div>` : ''}
+          ${op.topsolid_cam_settings ? `<div class="op-note" style="border-left-color:var(--tbs-accent);background:#F0FFF8">⚙️ TopSolid: ${op.topsolid_cam_settings}</div>` : ''}
+          ${op.remarques ? `<div class="op-note" style="border-left-color:var(--tbs-warn);background:#FFFBF0">💡 ${op.remarques}</div>` : ''}
+          ${op.avertissements && op.avertissements.length ? op.avertissements.map(w=>`<div class="op-note" style="border-left-color:var(--tbs-error);background:#FFF0F0">⚠️ ${w}</div>`).join('') : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Recommandations TopSolid
+  if(d.recommandations_topsolid) {
+    html += `<div class="op-section">
+      <div class="op-section-title">🎯 Recommandations TopSolid'Cam</div>
+      <div style="background:#EBF5FB;border-left:4px solid var(--tbs-mid);border-radius:0 8px 8px 0;padding:14px 16px;font-size:12px;line-height:1.8;color:var(--text);">
+        ${d.recommandations_topsolid}
+      </div>
+    </div>`;
+  }
+
+  // Avertissements généraux
+  if(d.avertissements_generaux && d.avertissements_generaux.length) {
+    html += `<div class="warnings-box">
+      <div class="warn-title">⚠ Avertissements</div>
+      <ul>${d.avertissements_generaux.map(w=>`<li>${w}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  // Footer fiche
+  html += `<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)">
+    <span style="font-family:var(--mono)">TBSTRATEGIES — Document FAO interne — ${new Date().toLocaleDateString('fr-FR')}</span>
+    <span style="font-family:var(--mono)">Généré par TBS CamAdvisor v1.0 / Claude API</span>
+  </div>`;
+
+  html += `</div>`; // fiche-body
+  document.getElementById('fiche-container').innerHTML = html;
+}
+
+// ─── Export PDF ───────────────────────────────────────────────────────────────
+async function exporterPDF() {
+  if(!ficheTechniqueData) return;
+  const btn = document.querySelector('.btn-pdf');
+  btn.textContent = '⏳ Génération PDF…';
+  btn.disabled = true;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const d = ficheTechniqueData;
+  const p = d.piece || {};
+  const m = d.machine || {};
+  const ops = d.operations || [];
+  const W = 210; const MARG = 14; const CW = W - MARG*2;
+
+  // Couleurs TBS
+  const BLEU_FONCE = [26, 82, 118];
+  const BLEU_MOY = [36, 113, 163];
+  const ACCENT = [0, 180, 140];
+  const GRIS = [100, 120, 140];
+
+  let y = 0;
+  const newPage = () => { doc.addPage(); y = 18; };
+  const checkY = (needed=20) => { if(y + needed > 280) newPage(); };
+
+  // ── Page de garde ────────────────────────────────────────────────────────
+  doc.setFillColor(...BLEU_FONCE);
+  doc.rect(0, 0, W, 45, 'F');
+  doc.setFillColor(...ACCENT);
+  doc.rect(0, 42, W, 2, 'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.setTextColor(174, 214, 241);
+  doc.text('TBSTRATEGIES — TOULOUSE', MARG, 14);
+
+  doc.setFontSize(20);
+  doc.setTextColor(255,255,255);
+  doc.text('FICHE TECHNIQUE D\'USINAGE', MARG, 26);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(174, 214, 241);
+  doc.text('TopSolid\'Cam V6 — Programme de fabrication', MARG, 34);
+
+  doc.setFontSize(9);
+  doc.setTextColor(174, 214, 241);
+  const dateStr = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  doc.text(dateStr, W - MARG - doc.getTextWidth(dateStr), 34);
+
+  y = 54;
+
+  // Info pièce
+  doc.setFillColor(240, 247, 255);
+  doc.roundedRect(MARG, y, CW, 26, 2, 2, 'F');
+  doc.setDrawColor(...BLEU_MOY);
+  doc.roundedRect(MARG, y, CW, 26, 2, 2, 'S');
+
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(...BLEU_FONCE);
+  const cols = CW/4;
+  [[p.designation||'—','DÉSIGNATION'],[p.reference||'—','RÉFÉRENCE'],
+   [p.matiere||'—','MATIÈRE'],[m.type||'—','MACHINE']].forEach(([val,lbl],i) => {
+    const x = MARG + i*cols + 4;
+    doc.text(lbl, x, y+8);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...BLEU_MOY);
+    doc.text(String(val).substring(0,22), x, y+16);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLEU_FONCE);
+  });
+  y += 34;
+
+  // ── Résumé outillage ────────────────────────────────────────────────────
+  if(d.resume_outillage && d.resume_outillage.length) {
+    checkY(20);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...BLEU_FONCE);
+    doc.text('OUTILLAGE REQUIS', MARG, y);
+    doc.setFillColor(...ACCENT); doc.rect(MARG, y+1, 30, 0.5, 'F');
+    y += 7;
+    d.resume_outillage.forEach((t, i) => {
+      if(i % 2 === 0 && i > 0) y += 10;
+      const x = MARG + (i%2) * (CW/2+2);
+      doc.setFillColor(235, 245, 251);
+      doc.roundedRect(x, y-4, CW/2-2, 9, 1, 1, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLEU_MOY);
+      doc.text(`Ø${t.diametre_mm}mm — ${String(t.outil).substring(0,30)}`, x+3, y+1);
+    });
+    y += 14;
+  }
+
+  // ── Opérations ───────────────────────────────────────────────────────────
+  ops.forEach(op => {
+    const outil = op.outil || {};
+    const pc = op.parametres_coupe || {};
+    checkY(60);
+
+    // En-tête opération
+    doc.setFillColor(...BLEU_FONCE);
+    doc.roundedRect(MARG, y, CW, 10, 2, 2, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
+    doc.text(`${op.numero}. ${op.nom}`, MARG+3, y+6.5);
+    const typeTxt = op.type_topsolid || '';
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(174,214,241);
+    doc.text(typeTxt, W - MARG - doc.getTextWidth(typeTxt) - 3, y+6.5);
+    y += 13;
+
+    // Tableau données
+    const rows = [
+      ['Outil', outil.type || '—', 'Désignation', String(outil.designation||'—').substring(0,30)],
+      [`Ø Diamètre`, `${outil.diametre_mm || '—'} mm`, 'Long. utile', `${outil.longueur_utile_mm || '—'} mm`],
+      ['Nb dents', `${outil.nb_dents || '—'} Z`, 'Hélice', `${outil.angle_helix_deg || '—'}°`],
+      ['Matière/Revêt.', String(outil.matiere_outil||'—').substring(0,22), 'Réf. fabr.', String(outil.fabricant_ref||'—').substring(0,22)],
+      ['Vc (m/min)', `${pc.vc_m_min || '—'}`, 'n (tr/min)', `${pc.n_tr_min ? Math.round(pc.n_tr_min) : '—'}`],
+      ['fz (mm/dent)', `${pc.fz_mm_dent || '—'}`, 'Vf (mm/min)', `${pc.vf_mm_min ? Math.round(pc.vf_mm_min) : '—'}`],
+      ['ap (mm)', `${pc.ap_mm || '—'}`, 'ae (%D / mm)', `${pc.ae_pourcent_D || '—'}% / ${pc.ae_mm || '—'}mm`],
+      ['Arrosage', pc.arrosage || '—', 'Tolérances', op.tolerances || '—'],
+    ];
+
+    rows.forEach((row, ri) => {
+      checkY(8);
+      const bg = ri % 2 === 0 ? [248,252,255] : [255,255,255];
+      doc.setFillColor(...bg);
+      doc.rect(MARG, y-4, CW, 7, 'F');
+      const colW = CW/4;
+      [0,1,2,3].forEach(ci => {
+        const x = MARG + ci * colW + 2;
+        if(ci % 2 === 0) {
+          doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...GRIS);
+          doc.text(String(row[ci]).toUpperCase(), x, y);
+        } else {
+          doc.setFont('helvetica','bold'); doc.setFontSize(8);
+          // Colonne valeurs numériques en bleu
+          const isNum = !isNaN(parseFloat(row[ci]));
+          doc.setTextColor(isNum ? BLEU_MOY[0] : BLEU_FONCE[0],
+                          isNum ? BLEU_MOY[1] : BLEU_FONCE[1],
+                          isNum ? BLEU_MOY[2] : BLEU_FONCE[2]);
+          doc.text(String(row[ci]).substring(0,28), x, y);
+        }
+      });
+      y += 7;
+    });
+
+    // Notes et séquence
+    if(op.sequence_passes) {
+      checkY(12);
+      doc.setFillColor(240, 248, 255); doc.setDrawColor(...ACCENT);
+      doc.rect(MARG, y, CW, 1, 'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...BLEU_MOY);
+      const lines = doc.splitTextToSize(`Séquence: ${op.sequence_passes}`, CW - 4);
+      lines.forEach(line => { checkY(5); doc.text(line, MARG+2, y+5); y+=5; });
+      y += 3;
+    }
+
+    if(op.topsolid_cam_settings) {
+      checkY(10);
+      doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(...GRIS);
+      const lines = doc.splitTextToSize(`TopSolid'Cam: ${op.topsolid_cam_settings}`, CW - 4);
+      lines.forEach(line => { checkY(5); doc.text(line, MARG+2, y+4); y+=4; });
+    }
+
+    if(op.remarques) {
+      checkY(10);
+      doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(180,120,0);
+      const lines = doc.splitTextToSize(`Remarque: ${op.remarques}`, CW - 4);
+      lines.forEach(line => { checkY(4); doc.text(line, MARG+2, y+4); y+=4; });
+    }
+
+    y += 6;
+    doc.setDrawColor(220,230,240); doc.setLineWidth(0.3);
+    doc.line(MARG, y, W-MARG, y);
+    y += 4;
+  });
+
+  // Recommandations générales
+  if(d.recommandations_topsolid) {
+    checkY(25);
+    doc.setFillColor(...BLEU_MOY);
+    doc.roundedRect(MARG, y, CW, 8, 1, 1, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(255,255,255);
+    doc.text('RECOMMANDATIONS TOPSOLID\'CAM', MARG+3, y+5.5);
+    y += 11;
+    doc.setFillColor(235,245,251); doc.roundedRect(MARG, y, CW, 3, 0, 0, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...BLEU_FONCE);
+    const lines = doc.splitTextToSize(d.recommandations_topsolid, CW-6);
+    lines.forEach(line => { checkY(5); doc.text(line, MARG+3, y+5); y+=5; });
+    y += 4;
+  }
+
+  // Footer sur chaque page
+  const totalPages = doc.getNumberOfPages();
+  for(let pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    doc.setFillColor(...BLEU_FONCE);
+    doc.rect(0, 290, W, 8, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(174,214,241);
+    doc.text('TBSTRATEGIES — Document FAO confidentiel — Usage interne', MARG, 295);
+    doc.text(`Page ${pg}/${totalPages}`, W-MARG-15, 295);
+  }
+
+  const ref = p.reference ? `_${p.reference}` : '';
+  doc.save(`TBS_FicheTechnique${ref}_${new Date().toISOString().slice(0,10)}.pdf`);
+
+  btn.textContent = '📥 Télécharger PDF';
+  btn.disabled = false;
+}
+
+// ─── Réinitialiser ────────────────────────────────────────────────────────────
+function reinitialiser() {
+  ficheTechniqueData = null;
+  fileContent3D = ''; filePdfContent = '';
+  fileName3D = ''; fileNamePdf = '';
+  document.getElementById('stateEmpty').style.display = '';
+  document.getElementById('stateResult').className = 'result';
+  document.getElementById('stateLoading').className = 'loading';
+  document.getElementById('fiche-container').innerHTML = '';
+  document.getElementById('btnReset').style.display = 'none';
+  document.getElementById('name3d').textContent = '';
+  document.getElementById('namePdf').textContent = '';
+  document.getElementById('zone3d').classList.remove('loaded');
+  document.getElementById('zonePdf').classList.remove('loaded');
+  document.getElementById('file3d').value = '';
+  document.getElementById('filePdf').value = '';
+  ['ls1','ls2','ls3','ls4','ls5'].forEach(id => { document.getElementById(id).className = ''; });
+}
+</script>
+</body>
+</html>
