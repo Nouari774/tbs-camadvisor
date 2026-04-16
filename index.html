@@ -702,7 +702,7 @@ async function appelClaude(prompt) {
   messages[0].content.push({ type: 'text', text: prompt });
 
   const bodyPayload = {
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-sonnet-20241022',
     max_tokens: 4096,
     system: `Tu es un expert FAO (Fabrication Assistée par Ordinateur) spécialisé en usinage CNC aéronautique chez TBSTRATEGIES (Toulouse). 
 Tu maîtrises parfaitement TopSolid'Cam V6, les normes aéronautiques (EN9100, AS9102), et les catalogues outils Sandvik, Kennametal, ISCAR, Walter, Seco.
